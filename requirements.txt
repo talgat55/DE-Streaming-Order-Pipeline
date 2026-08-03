@@ -1,2 +1,4 @@
 kafka-python
 faker
+psycopg2-binary
+python-dotenv
