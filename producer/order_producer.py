@@ -23,7 +23,7 @@ def create_order_event() -> dict:
         "product_id": random.randint(1, 100_000),
         "quantity": quantity,
         "unit_price": unit_price,
-        "linet_total": round(quantity * unit_price, 2),
+        "line_total": round(quantity * unit_price, 2),
         "status": random.choice([
             "created",
             "paid",

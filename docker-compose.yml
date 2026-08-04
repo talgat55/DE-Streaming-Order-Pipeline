@@ -44,7 +44,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
+  spark:
+    image: apache/spark:4.2.0-scala2.13-java17-python3-r-ubuntu
+    container_name: streaming_spark
+    depends_on:
+      - kafka
+      - postgres
+    environment:
+      SPARK_SUBMIT_OPTS: "-Divy.home=/opt/spark-ivy -Divy.cache.dir=/opt/spark-ivy/cache"
+    volumes:
+      - ./spark:/opt/spark-apps
+      - ./data/checkpoints:/opt/spark-checkpoints
+      - ./data/ivy:/opt/spark-ivy
+    command: [ "sleep", "infinity" ]
 volumes:
   kafka_data:
   postgres_data:

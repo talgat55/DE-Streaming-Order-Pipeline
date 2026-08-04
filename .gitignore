@@ -42,3 +42,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Spark runtime data (checkpoints, Ivy cache)
+data/checkpoints/
+data/ivy/
