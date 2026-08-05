@@ -1,34 +1,23 @@
 import json
-import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from typing import Any
 from kafka import KafkaConsumer
-from dotenv import load_dotenv
-
+from config.kafka import (
+    KAFKA_BOOTSTRAP_SERVERS,
+    KAFKA_CONSUMER_GROUP,
+    KAFKA_TOPIC,
+)
 from db import get_connection
-
-load_dotenv()
-
-KAFKA_BOOTSTRAP_SERVERS = os.getenv(
-    "KAFKA_BOOTSTRAP_SERVERS",
-    "localhost:9092",
-)
-
-KAFKA_TOPIC = os.getenv(
-    "KAFKA_TOPIC",
-    "order-events",
-)
-
-CONSUMER_GROUP = os.getenv(
-    "KAFKA_CONSUMER_GROUP",
-    "order-events-postgres-consumer",
-)
 
 def create_consumer() -> KafkaConsumer:
     return KafkaConsumer(
         KAFKA_TOPIC,
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-        group_id=CONSUMER_GROUP,
+        group_id=KAFKA_CONSUMER_GROUP,
         auto_offset_reset="earliest",
         enable_auto_commit=False,
         key_deserializer=lambda key: key.decode("utf-8") if key else None,
@@ -96,7 +85,7 @@ def main() -> None:
 
     print(
         f"Consumer started. "
-        f"Topic={KAFKA_TOPIC}, group={CONSUMER_GROUP}"
+        f"Topic={KAFKA_TOPIC}, group={KAFKA_CONSUMER_GROUP}"
     )
 
     try:

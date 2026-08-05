@@ -1,43 +1,19 @@
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import col, from_json, lit
-from pyspark.sql.types import (
-    DecimalType,
-    IntegerType,
-    LongType,
-    StringType,
-    StructField,
-    StructType,
-    TimestampType,
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from config.database import JDBC_PROPERTIES, JDBC_URL
+from config.kafka import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC
+from config.spark import (
+    CHECKPOINT_ORDER_EVENTS,
+    ORDER_EVENT_SCHEMA,
+    SPARK_BATCH_TRIGGER,
+    TABLE_SPARK_ORDER_EVENTS,
 )
 
-
-KAFKA_BOOTSTRAP_SERVERS = "kafka:29092"
-KAFKA_TOPIC = "order-events"
-
-CHECKPOINT_LOCATION = "/opt/spark-checkpoints/order-events-postgres"
-
-JDBC_URL = "jdbc:postgresql://postgres:5432/streaming_orders"
-JDBC_TABLE = "spark_order_events"
-
-JDBC_PROPERTIES = {
-    "user": "streaming_user",
-    "password": "streaming_pass",
-    "driver": "org.postgresql.Driver",
-}
-
-
-event_schema = StructType([
-    StructField("event_id", StringType(), False),
-    StructField("order_id", LongType(), False),
-    StructField("customer_id", LongType(), False),
-    StructField("product_id", LongType(), False),
-    StructField("quantity", IntegerType(), False),
-    StructField("unit_price", DecimalType(12, 2), False),
-    StructField("line_total", DecimalType(14, 2), False),
-    StructField("status", StringType(), False),
-    StructField("city", StringType(), True),
-    StructField("event_time", TimestampType(), False),
-])
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.functions import col, from_json, lit
 
 
 def write_batch_to_postgres(
@@ -77,7 +53,7 @@ def write_batch_to_postgres(
         .mode("append")
         .jdbc(
             url=JDBC_URL,
-            table=JDBC_TABLE,
+            table=TABLE_SPARK_ORDER_EVENTS,
             properties=JDBC_PROPERTIES,
         )
     )
@@ -120,7 +96,7 @@ def main() -> None:
         )
         .withColumn(
             "event",
-            from_json(col("json_value"), event_schema),
+            from_json(col("json_value"), ORDER_EVENT_SCHEMA),
         )
         .select(
             "topic",
@@ -141,9 +117,9 @@ def main() -> None:
         .outputMode("append")
         .option(
             "checkpointLocation",
-            CHECKPOINT_LOCATION,
+            CHECKPOINT_ORDER_EVENTS,
         )
-        .trigger(processingTime="5 seconds")
+        .trigger(processingTime=SPARK_BATCH_TRIGGER)
         .start()
     )
 

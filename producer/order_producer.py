@@ -1,14 +1,16 @@
 import json
 import random
+import sys
 import time
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from faker import Faker
 from kafka import KafkaProducer
-
-KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
-KAFKA_TOPIC = "order-events"
+from config.kafka import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC
 
 fake = Faker()
 

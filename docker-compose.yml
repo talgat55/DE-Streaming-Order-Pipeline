@@ -52,8 +52,13 @@ services:
       - postgres
     environment:
       SPARK_SUBMIT_OPTS: "-Divy.home=/opt/spark-ivy -Divy.cache.dir=/opt/spark-ivy/cache"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      JDBC_HOST: postgres
+      JDBC_PORT: "5432"
+      SPARK_CHECKPOINT_BASE: /opt/spark-checkpoints
     volumes:
       - ./spark:/opt/spark-apps
+      - ./config:/opt/spark-apps/config
       - ./data/checkpoints:/opt/spark-checkpoints
       - ./data/ivy:/opt/spark-ivy
     command: [ "sleep", "infinity" ]
